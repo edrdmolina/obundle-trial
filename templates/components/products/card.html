@@ -66,13 +66,23 @@
            {{#if settings.data_tag_enabled}} data-event-type="product-click" {{/if}}
         >
             <div class="card-img-container">
-                {{> components/common/responsive-img
+                <!-- Replaced the responsive-img component with an img tag -->
+                <img class="card-image lazyload"
+                    data-sizes="auto"
+                    src="{{cdn 'img/loading.svg'}}" 
+                    alt="{{image.alt}}" 
+                    title="{{image.alt}}"
+                    data-src="{{getImage image}}"
+                    data-hoverimage="{{#replace '{:size}' images.1.data}}500x659{{/replace}}{{getImage images.1.data 'productgallery_size' (cdn theme_settings.default_image_product)}}"
+                />
+                <!-- Original Code that was replaced in order to apply hover effect -->
+                <!-- {{> components/common/responsive-img
                     image=image
                     class="card-image"
                     fallback_size=theme_settings.productgallery_size
                     lazyload=theme_settings.lazyload_mode
                     default_image=theme_settings.default_image_product
-                }}
+                }} -->
             </div>
         </a>
 
