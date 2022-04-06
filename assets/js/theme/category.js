@@ -36,6 +36,8 @@ export default class Category extends CatalogPage {
 
         compareProducts(this.context);
 
+        this.initializeHoverEffect();
+
         if ($('#facetedSearch').length > 0) {
             this.initFacetedSearch();
         } else {
@@ -53,6 +55,29 @@ export default class Category extends CatalogPage {
         if ($noProductsMessage.length) {
             $noProductsMessage.focus();
         }
+    }
+
+    /*
+    > Implementation of hover effect over individual Product cards.
+    *   On every page load we search for all tags with the card-figure
+    *   class attribute and store them into the cardFigures array.
+    *   we then add an event listener to each card-figure to update the
+    *   img src attribute when entering and exiting with the mouse.
+    */
+
+    initializeHoverEffect() {
+        const cardFigures = document.querySelectorAll('.card-figure');
+        cardFigures.forEach(cardFigure => {
+            const imageElement = cardFigure.querySelector('.card-image');
+            const defaultImage = imageElement.dataset.src;
+            const secondaryImage = imageElement.dataset.hoverimage;
+            cardFigure.addEventListener('mouseenter', () => {
+                imageElement.src = secondaryImage;
+            });
+            cardFigure.addEventListener('mouseleave', () => {
+                imageElement.src = defaultImage;
+            });
+        });
     }
 
     initFacetedSearch() {
