@@ -5,6 +5,11 @@ Completed by Eduardo Molina.
 
 preview code: nlcsayf4t6
 
+If you wish to log in without having to create an account.You may use the account I have already created.
+
+email: edmolina.solutions@gmail.com
+password: Password123?
+
 <hr>
 
 ## Table of Contents
