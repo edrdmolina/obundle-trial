@@ -39,10 +39,10 @@ Second, I directed to Products > Add, filled out the form, added two images, and
 Create a feature that will show the product's second image when it is hovered on.
 
 ### Implementation:
-[./templates/components/products/card.html](templates/components/products/card.html) lines 71-78
 
 Using The Handlebars Helpers provided by BigCommerce in their [documentation](https://developer.bigcommerce.com/stencil-docs/ZG9jOjIyMDcxOA-handlebars-helpers-reference). I used the getImage helper to load the default image and secondary image into separate data attributes.
 
+[./templates/components/products/card.html](templates/components/products/card.html) lines 71-78
 ```html
 <img class="card-image lazyload"
     data-sizes="auto"
@@ -54,7 +54,6 @@ Using The Handlebars Helpers provided by BigCommerce in their [documentation](ht
 />
 ```
 
-[./assets/js/theme/category.js](assets/js/theme/category.js) lines 74-87
 
 Then I created a function to initiate the hover effect with event listeners.
 
@@ -62,6 +61,7 @@ On every page load we search for all tags with the card-figure class attribute a
 
 I then added an event listener to each card-figure to update the img src attribute when entering and exiting with the mouse.
 
+[./assets/js/theme/category.js](assets/js/theme/category.js) lines 74-87
 ```js
 initHoverEffect() {
     const cardFigures = document.querySelectorAll('.card-figure');
@@ -93,9 +93,18 @@ Both buttons should utilize the Storefront API for completion.
 
 1. Add a container with two button tags and a paragraph tag inside the page-content class tag.
 
-    [templates/pages/category.html](templates/pages/category.html) lines 52-56
+    [templates/pages/category.html](templates/pages/category.html) lines 52-68
     ``` html
     <div class="page-content" id="product-listing-container">
+        {{#if customer}}
+        <div class="banner">
+            <p>Customer Name: {{customer.name}}</p>
+            <p>Customer Email: {{customer.email}}</p>
+            {{#if customer.phone}}
+                <p>Customer Phone: {{customer.phone}}</p>
+            {{/if}}
+        </div>
+        {{/if}}
         <p class="category-cart-message"></p>
         <div class="category-cart-buttons">
             <button class="button button--small" id="add-all-items-button">Add All To Cart</button>    
@@ -269,3 +278,17 @@ If a customer is logged in - at the top of the category page show a banner that 
 
 ### Implementation: 
 
+Since The customer Object is always included and is available when an active shopper is logged in (as per [Documentation](https://developer.bigcommerce.com/stencil-docs/ZG9jOjIyMDcxNg-front-matter-reference)). I was able to use Handlebars JS to set a conditional for the customer object. If true, it would generate a div with customer data. Since the Phone data is not required for a customer account, I created a conditional in order to check if it were available.
+
+[templates/pages/category.html](templates/pages/category.html) lines 52-60
+``` html
+{{#if customer}}
+    <div class="banner">
+        <p>Customer Name: {{customer.name}}</p>
+        <p>Customer Email: {{customer.email}}</p>
+        {{#if customer.phone}}
+            <p>Customer Phone: {{customer.phone}}</p>
+        {{/if}}
+    </div>
+{{/if}}
+```
