@@ -1,146 +1,253 @@
-# Cornerstone
-![tests](https://github.com/bigcommerce/cornerstone/workflows/Theme%20Bundling%20Test/badge.svg?branch=master)
+# oBundle BigCommerce Assessment For New Candidates
+Completed by Eduardo Molina.
 
-Stencil's Cornerstone theme is the building block for BigCommerce theme developers to get started quickly developing premium quality themes on the BigCommerce platform.
+[Storefront Preview Link](https://bigcommercetrialstore-f8.mybigcommerce.com/?ctk=75854849-0d7c-416a-b446-d1e7032527c4).
 
-### Stencil Utils
-[Stencil-utils](https://github.com/bigcommerce/stencil-utils) is our supporting library for our events and remote interactions.
+preview code: nlcsayf4t6
 
-## JS API
-When writing theme JavaScript (JS) there is an API in place for running JS on a per page basis. To properly write JS for your theme, the following page types are available to you:
+<hr>
 
-* "pages/account/addresses"
-* "pages/account/add-address"
-* "pages/account/add-return"
-* "pages/account/add-wishlist"
-* "pages/account/recent-items"
-* "pages/account/download-item"
-* "pages/account/edit"
-* "pages/account/return-saved"
-* "pages/account/returns"
-* "pages/account/payment-methods"
-* "pages/auth/login"
-* "pages/auth/account-created"
-* "pages/auth/create-account"
-* "pages/auth/new-password"
-* "pages/blog"
-* "pages/blog-post"
-* "pages/brand"
-* "pages/brands"
-* "pages/cart"
-* "pages/category"
-* "pages/compare"
-* "pages/errors"
-* "pages/gift-certificate/purchase"
-* "pages/gift-certificate/balance"
-* "pages/gift-certificate/redeem"
-* "global"
-* "pages/home"
-* "pages/order-complete"
-* "pages/page"
-* "pages/product"
-* "pages/search"
-* "pages/sitemap"
-* "pages/subscribed"
-* "pages/account/wishlist-details"
-* "pages/account/wishlists"
+## Task #1
+Create a product called Special Item which will be assigned to a new category called Special Items. Be sure to add at least 2 images during the product creation.
 
-These page types will correspond to the pages within your theme. Each one of these page types map to an ES6 module that extends the base `PageManager` abstract class.
+### Implementation:
+First, I created a new category by logging into the storefront dashboard and directing to Products > Product Categories and clicking Create A Category.
 
-```javascript
-    export default class Auth extends PageManager {
-        constructor() {
-            // Set up code goes here; attach to internals and use internals as you would 'this'
-        }
-    }
-```
+Second, I directed to Products > Add, filled out the form, added two images, and selected the newly created category.
 
-### JS Template Context Injection
-Occasionally you may need to use dynamic data from the template context within your client-side theme application code.
+<hr>
 
-Two helpers are provided to help achieve this.
+## Task #2
+Create a feature that will show the product's second image when it is hovered on.
 
-The inject helper allows you to compose a JSON object with a subset of the template context to be sent to the browser.
+### Implementation:
+[./templates/components/products/card.html](templates/components/products/card.html) lines 71-78
 
-```
-{{inject "stringBasedKey" contextValue}}
-```
-
-To retrieve the parsable JSON object, just call `{{jsContext}}` after all of the `{{@inject}}` calls.
-
-For example, to setup the product name in your client-side app, you can do the following if you're in the context of a product:
+Using The Handlebars Helpers provided by BigCommerce in their [documentation](https://developer.bigcommerce.com/stencil-docs/ZG9jOjIyMDcxOA-handlebars-helpers-reference). I used the getImage helper to load the default image and secondary image into separate data attributes.
 
 ```html
-{{inject "myProductName" product.title}}
-
-<script>
-// Note the lack of quotes around the jsContext handlebars helper, it becomes a string automatically.
-var jsContext = JSON.parse({{jsContext}}); // jsContext would output "{\"myProductName\": \"Sample Product\"}" which can feed directly into your JavaScript
-
-console.log(jsContext.myProductName); // Will output: Sample Product
-</script>
+<img class="card-image lazyload"
+    data-sizes="auto"
+    src="{{cdn 'img/loading.svg'}}" 
+    alt="{{image.alt}}" 
+    title="{{image.alt}}"
+    data-src="{{getImage image}}"
+    data-hoverimage="{{#replace '{:size}' images.1.data}}500x659{{/replace}}{{getImage images.1.data 'productgallery_size' (cdn theme_settings.default_image_product)}}"
+/>
 ```
 
-You can compose your JSON object across multiple pages to create a different set of client-side data depending on the currently loaded template context.
+[./assets/js/theme/category.js](assets/js/theme/category.js) lines 74-87
 
-The stencil theme makes the jsContext available on both the active page scoped and global PageManager objects as `this.context`.
+Then I created a function to initiate the hover effect with event listeners.
 
-## Polyfilling via Feature Detection
-Cornerstone implements [this strategy](https://philipwalton.com/articles/loading-polyfills-only-when-needed/) for polyfilling.
+On every page load we search for all tags with the card-figure class attribute and store them into the cardFigures array.
 
-In `templates/components/common/polyfill-script.html` there is a simple feature detection script which can be extended to detect any recent JS features you intend to use in your theme code.
+I then added an event listener to each card-figure to update the img src attribute when entering and exiting with the mouse.
 
-If any one of the conditions is not met, an additional blocking JS bundle configured in `assets/js/polyfills.js` will be loaded to polyfill modern JS features before the main bundle executes. 
-
-This intentionally prioritizes the experience of the 90%+ of shoppers who are on modern browsers in terms of performance, while maintaining compatibility (at the expense of additional JS download+parse for the polyfills) for users on legacy browsers.
-
-## Static assets
-Some static assets in the Stencil theme are handled with Grunt if required. This
-means you have some dependencies on grunt and npm. To get started:
-
-First make sure you have Grunt installed globally on your machine:
-
-```
-npm install -g grunt-cli
-```
-
-and run:
-
-```
-npm install
+```js
+initHoverEffect() {
+    const cardFigures = document.querySelectorAll('.card-figure');
+    cardFigures.forEach(cardFigure => {
+        const imageElement = cardFigure.querySelector('.card-image');
+        const defaultImage = imageElement.dataset.src;
+        const secondaryImage = imageElement.dataset.hoverimage;
+        cardFigure.addEventListener('mouseenter', () => {
+            imageElement.src = secondaryImage;
+        });
+        cardFigure.addEventListener('mouseleave', () => {
+            imageElement.src = defaultImage;
+        });
+    });
+}
 ```
 
-Note: package-lock.json file was generated by Node version 10 and npm version 6.11.3. The app supports Node 10 as well as multiple versions of npm, but we should always use those versions when updating package-lock.json, unless it is decided to upgrade those, and in this case the readme should be updated as well. If using a different version for node OR npm, please delete the package-lock.json file prior to installing node packages and also prior to pushing to github.
+lastly, I called the initHoverEffect function in the onReady method of the Category class.
 
-If updating or adding a dependency, please double check that you are working on Node version 10 and npm version 6.11.3 and run ```npm update <package_name>```  or ```npm install <package_name>``` (avoid running npm install for updating a package). After updating the package, please make sure that the changes in the package-lock.json reflect only the updated/new package prior to pushing the changes to github.
+<hr>
 
+## Task #3
 
-### Icons
-Icons are delivered via a single SVG sprite, which is embedded on the page in
-`templates/layout/base.html`. It is generated via a grunt task `grunt svgstore`.
+Add a button at the top of the category page labeled Add All To Cart. When clicked, the product will be added to the cart. Notify the user that the product has been added.
+If the cart has an item in it - show a button next to the Add All To Cart button which says Remove All Items. When clicked it should clear the cart and notify the user.
+Both buttons should utilize the Storefront API for completion. 
 
-The task takes individual SVG files for each icon in `assets/icons` and bundles
-them together, to be inlined on the top of the theme, via an ajax call managed
-by svg-injector. Each icon can then be called in a similar way to an inline image via:
+### Implementation:
 
-```
-<svg><use xlink:href="#icon-svgFileName" /></svg>
-```
+1. Add a container with two button tags and a paragraph tag inside the page-content class tag.
 
-The ID of the SVG icon you are calling is based on the filename of the icon you want,
-with `icon-` prepended. e.g. `xlink:href="#icon-facebook"`.
+    [templates/pages/category.html](templates/pages/category.html) lines 52-56
+    ``` html
+    <div class="page-content" id="product-listing-container">
+        <p class="category-cart-message"></p>
+        <div class="category-cart-buttons">
+            <button class="button button--small" id="add-all-items-button">Add All To Cart</button>    
+            <button class="button button--small" id="remove-all-items-button">Remove All Items</button>
+        </div>
+        {{> components/category/product-listing}}
+        {{{region name="category_below_content"}}}
+    </div>
+    ```
 
-Simply add your new icon SVG file to the icons folder, and run `grunt svgstore`,
-or just `grunt`.
+2. Create function to initialize the Add All To Cart button. function finds the button on the DOM and adds an event listener. If the cart is empty it will create a new cart and add all items in it. 
 
-#### License
+    [./assets/js/theme/category.js](assets/js/theme/category.js) lines 82-96
+    ``` js
+    initAddAllToCart() {
+        const addAllButton = document.querySelector('#add-all-items-button');
+        addAllButton.addEventListener('click', async () => {
+            const cartItems = this.createLineItems();
+            if (!this.cartId) {
+                const createdCart = await this.createCart('/api/storefront/carts', cartItems);
+                this.cartId = createdCart.id;
+                this.toggleRemoveAllFromCart(true);
+            } else {
+                await this.addItemsToCart('/api/storefront/carts', this.cartId, cartItems);
+            }
+            this.showMessage('Added all items in this category to cart.');
+            cartPreview(this.context.secureBaseUrl, this.cartId);
+        });
+    }
+    ```
+3. In order to add the entire category of products, I had to create an object with an array of objects named lineItems with the product id and quantity. First I created an array of all the article tags with card classes inside the category page. Inside each article tag I added a data attribute with the product id. Finally I return the array of cartItems.
 
-(The MIT License)
-Copyright (C) 2015-present BigCommerce Inc.
-All rights reserved.
+    [./assets/js/theme/category.js](assets/js/theme/category.js) lines 125-136
+    ``` js
+    createLineItems() {
+        const products = document.querySelectorAll('.card');
+        const cartItems = { lineItems: [] };
+        products.forEach(product => {
+            const lineItem = {
+                quantity: 1,
+                productId: parseInt(product.dataset.id),
+            };
+            cartItems.lineItems.push(lineItem);
+        });
+        return cartItems;
+    }
+    ```
+    [templates/components/products/card.html](templates/components/products/card.html) lines 1-3
+    ``` html
+    <article
+        class="card"
+        data-id={{id}}
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+    etc...
+    ```
+4. In the case where the cart was already empty, we create a new cart with the createCart function by sending a POST request to the storefront API with the cartItems object created with the createLineItems function.
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+    [./assets/js/theme/category.js](assets/js/theme/category.js) lines 138-154
+    ``` js
+    async createCart(url, cartItems) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(cartItems),
+            });
+            return await response.json();
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error(error);
+        }
+    }
+    ```
+5. In the case where there are already items in a cart, we add the items to the cart by sending a POST request to the Storefront API with the cartItems object created with the createLineItems function AND the cartId.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    [./assets/js/theme/category.js](assets/js/theme/category.js) lines 107-123
+    ``` js
+    async addItemsToCart(url, cartId, cartItems) {
+        try {
+            const response = await fetch(`${url}/${cartId}/items`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(cartItems),
+            });
+            return await response.json();
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error(error);
+        }
+    }
+    ```
+6. For the Remove All Items button I also had to initiate the on click event listener. 
+
+    [./assets/js/theme/category.js](assets/js/theme/category.js) lines 156-167
+    ``` js
+    initRemoveAllFromCart() {
+        const removeAllButton = document.querySelector('#remove-all-items-button');
+        if (removeAllButton) {
+            removeAllButton.addEventListener('click', () => {
+                this.deleteCart('/api/storefront/carts', this.cartId);
+                this.cartId = null;
+                this.showMessage('Emptied cart');
+                cartPreview(this.context.secureBaseUrl, this.cartId);
+                this.toggleRemoveAllFromCart(false);
+            });
+        }
+    }
+    ```
+    Once the Remove All Items button is clicked it will delete the cart by sending a DELETE request to the Storefront API with the cartId. Then it will remove the cartId from the Category class constructor. 
+
+    [./assets/js/theme/category.js](assets/js/theme/category.js) lines 169-183
+    ``` js
+    async deleteCart(url, cartId) {
+        try {
+            await fetch(`${url}/${cartId}`, {
+                method: 'DELETE',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            return;
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error(error);
+        }
+    }
+    ```
+7. After clicking either button, the show message function will be called showing a paragraph above the buttons making it aware to the customer of the action he just initiated. After 10 seconds it will disappear.
+
+    [./assets/js/theme/category.js](assets/js/theme/category.js) lines 98-105
+    ``` js
+    showMessage(message) {
+        const paragraph = document.querySelector('.category-cart-message');
+        paragraph.innerText = message;
+        paragraph.style.opacity = 1;
+        setTimeout(() => {
+            paragraph.style.opacity = 0;
+        }, 10000);
+    }
+    ```
+
+8. After clicking either button it will toggle the Remove All Items button from the DOM. If the Add All Items button is clicked for the first time, the Remove All Items buttons will appear. Otherwise, The Remove All Items will disappear.
+
+    [./assets/js/theme/category.js](assets/js/theme/category.js) lines 185-192
+    ``` js
+    toggleRemoveAllFromCart(bool) {
+        const removeAllButton = document.querySelector('#remove-all-items-button');
+        if (bool) {
+            removeAllButton.style.display = 'inline-block';
+        } else {
+            removeAllButton.style.display = 'none';
+        }
+    }
+    ```
+9. After clicking either button, the cartPreview function from [./assets/js/theme/global/cart-preview.js](assets/js/theme/global/cart-preview.js) is called in order to reload the cart item quantity and cart preview from the top right corner of the screen.
+
+<hr>
+
+## Bonus Task
+
+If a customer is logged in - at the top of the category page show a banner that shows some customer details (i.e. name, email, phone, etc). This should utilize the data that is rendered via Handlebars on the Customer Object. 
+
+### Implementation: 
+

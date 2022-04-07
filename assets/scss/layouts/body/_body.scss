@@ -27,6 +27,16 @@
 .page-content,
 .page-content--full {
     @include grid-column(12);
+
+    .category-cart-message {
+        color: stencilColor("color-textSecondary");
+        opacity: 0;
+    }
+}
+
+.category-cart-buttons {
+    display: flex;
+    gap: 1rem;
 }
 
 .page-content--centered {

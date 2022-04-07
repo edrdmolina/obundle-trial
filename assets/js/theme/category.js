@@ -3,11 +3,15 @@ import CatalogPage from './catalog';
 import compareProducts from './global/compare-products';
 import FacetedSearch from './common/faceted-search';
 import { createTranslationDictionary } from '../theme/common/utils/translations-utils';
+import cartPreview from './global/cart-preview';
+import { parseInt } from 'lodash';
 
 export default class Category extends CatalogPage {
     constructor(context) {
         super(context);
         this.validationDictionary = createTranslationDictionary(context);
+        // > oBundle Implementation.
+        this.cartId = context.cartId;
     }
 
     setLiveRegionAttributes($element, roleType, ariaLiveStatus) {
@@ -29,14 +33,17 @@ export default class Category extends CatalogPage {
 
     onReady() {
         this.arrangeFocusOnSortBy();
+        // > oBundle implementation.
+        this.initHoverEffect();
+        this.initAddAllToCart();
+        this.initRemoveAllFromCart();
+        if (!this.cartId) this.toggleRemoveAllFromCart(false);
 
         $('[data-button-type="add-cart"]').on('click', (e) => this.setLiveRegionAttributes($(e.currentTarget).next(), 'status', 'polite'));
 
         this.makeShopByPriceFilterAccessible();
 
         compareProducts(this.context);
-
-        this.initializeHoverEffect();
 
         if ($('#facetedSearch').length > 0) {
             this.initFacetedSearch();
@@ -57,15 +64,7 @@ export default class Category extends CatalogPage {
         }
     }
 
-    /*
-    > Implementation of hover effect over individual Product cards.
-    *   On every page load we search for all tags with the card-figure
-    *   class attribute and store them into the cardFigures array.
-    *   we then add an event listener to each card-figure to update the
-    *   img src attribute when entering and exiting with the mouse.
-    */
-
-    initializeHoverEffect() {
+    initHoverEffect() {
         const cardFigures = document.querySelectorAll('.card-figure');
         cardFigures.forEach(cardFigure => {
             const imageElement = cardFigure.querySelector('.card-image');
@@ -78,6 +77,118 @@ export default class Category extends CatalogPage {
                 imageElement.src = defaultImage;
             });
         });
+    }
+
+    initAddAllToCart() {
+        const addAllButton = document.querySelector('#add-all-items-button');
+        addAllButton.addEventListener('click', async () => {
+            const cartItems = this.createLineItems();
+            if (!this.cartId) {
+                const createdCart = await this.createCart('/api/storefront/carts', cartItems);
+                this.cartId = createdCart.id;
+                this.toggleRemoveAllFromCart(true);
+            } else {
+                await this.addItemsToCart('/api/storefront/carts', this.cartId, cartItems);
+            }
+            this.showMessage('Added all items in this category to cart.');
+            cartPreview(this.context.secureBaseUrl, this.cartId);
+        });
+    }
+
+    showMessage(message) {
+        const paragraph = document.querySelector('.category-cart-message');
+        paragraph.innerText = message;
+        paragraph.style.opacity = 1;
+        setTimeout(() => {
+            paragraph.style.opacity = 0;
+        }, 10000);
+    }
+
+    async addItemsToCart(url, cartId, cartItems) {
+        try {
+            const response = await fetch(`${url}/${cartId}/items`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(cartItems),
+            });
+            return await response.json();
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error(error);
+        }
+    }
+
+    createLineItems() {
+        const products = document.querySelectorAll('.card');
+        const cartItems = { lineItems: [] };
+        products.forEach(product => {
+            const lineItem = {
+                quantity: 1,
+                productId: parseInt(product.dataset.id),
+            };
+            cartItems.lineItems.push(lineItem);
+        });
+        return cartItems;
+    }
+
+    async createCart(url, cartItems) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(cartItems),
+            });
+            return await response.json();
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error(error);
+        }
+    }
+
+    initRemoveAllFromCart() {
+        const removeAllButton = document.querySelector('#remove-all-items-button');
+        if (removeAllButton) {
+            removeAllButton.addEventListener('click', () => {
+                this.deleteCart('/api/storefront/carts', this.cartId);
+                this.cartId = null;
+                this.showMessage('Emptied cart');
+                cartPreview(this.context.secureBaseUrl, this.cartId);
+                this.toggleRemoveAllFromCart(false);
+            });
+        }
+    }
+
+    async deleteCart(url, cartId) {
+        try {
+            await fetch(`${url}/${cartId}`, {
+                method: 'DELETE',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            return;
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error(error);
+        }
+    }
+
+    toggleRemoveAllFromCart(bool) {
+        const removeAllButton = document.querySelector('#remove-all-items-button');
+        if (bool) {
+            removeAllButton.style.display = 'inline-block';
+        } else {
+            removeAllButton.style.display = 'none';
+        }
     }
 
     initFacetedSearch() {
