@@ -7,7 +7,20 @@ preview code: nlcsayf4t6
 
 <hr>
 
-## Task #1
+## Table of Contents
+
+1. [Task 1](#task1)
+    - Create Special Items Category and Special Item product inside category with two product pictures.
+2. [Task 2](#task2)
+    - Implement hover over product and change product image to secondary product image effect.
+3. [Task 3](#task3)
+    - Implement add entire category page to cart button, and empty cart button inside the category page.
+4. [Bonus Task](#bonusTask)
+    - Show Logged In customer details on the category page.
+
+<hr>
+
+<h2 id="task1">Task #1</h2>
 Create a product called Special Item which will be assigned to a new category called Special Items. Be sure to add at least 2 images during the product creation.
 
 ### Implementation:
@@ -17,7 +30,7 @@ Second, I directed to Products > Add, filled out the form, added two images, and
 
 <hr>
 
-## Task #2
+<h2 id="task2">Task #2</h2>
 Create a feature that will show the product's second image when it is hovered on.
 
 ### Implementation:
@@ -65,7 +78,7 @@ lastly, I called the initHoverEffect function in the onReady method of the Categ
 
 <hr>
 
-## Task #3
+<h2 id="task3">Task #3</h2>
 
 Add a button at the top of the category page labeled Add All To Cart. When clicked, the product will be added to the cart. Notify the user that the product has been added.
 If the cart has an item in it - show a button next to the Add All To Cart button which says Remove All Items. When clicked it should clear the cart and notify the user.
@@ -245,7 +258,7 @@ Both buttons should utilize the Storefront API for completion.
 
 <hr>
 
-## Bonus Task
+<h2 id="bonusTask">Bonus Task</h2>
 
 If a customer is logged in - at the top of the category page show a banner that shows some customer details (i.e. name, email, phone, etc). This should utilize the data that is rendered via Handlebars on the Customer Object. 
 
