@@ -270,6 +270,17 @@ Both buttons should utilize the Storefront API for completion.
     ```
 9. After clicking either button, the cartPreview function from [./assets/js/theme/global/cart-preview.js](assets/js/theme/global/cart-preview.js) is called in order to reload the cart item quantity and cart preview from the top right corner of the screen.
 
+10. Finally The buttons are and the hover effect is initialized in the onReady method.
+
+    [./assets/js/theme/category.js](assets/js/theme/category.js) lines 37-41
+    ```js
+    this.initHoverEffect();
+    this.initAddAllToCart();
+    this.initRemoveAllFromCart();
+    if (this.cartId) this.toggleRemoveAllFromCart(true);
+    else this.toggleRemoveAllFromCart(false);
+    ```
+
 <hr>
 
 <h2 id="bonusTask">Bonus Task</h2>
