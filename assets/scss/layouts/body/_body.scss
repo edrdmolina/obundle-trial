@@ -39,6 +39,10 @@
     gap: 1rem;
 }
 
+.d-none {
+    display: none;
+}
+
 .page-content--centered {
 
     @include breakpoint("medium") {

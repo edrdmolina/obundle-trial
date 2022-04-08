@@ -185,9 +185,9 @@ export default class Category extends CatalogPage {
     toggleRemoveAllFromCart(bool) {
         const removeAllButton = document.querySelector('#remove-all-items-button');
         if (bool) {
-            removeAllButton.style.display = 'inline-block';
+            removeAllButton.classList.remove('d-none');
         } else {
-            removeAllButton.style.display = 'none';
+            removeAllButton.classList.add('d-none');
         }
     }
 
