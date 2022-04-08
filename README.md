@@ -108,7 +108,7 @@ Both buttons should utilize the Storefront API for completion.
         <p class="category-cart-message"></p>
         <div class="category-cart-buttons">
             <button class="button button--small" id="add-all-items-button">Add All To Cart</button>    
-            <button class="button button--small" id="remove-all-items-button">Remove All Items</button>
+            <button class="button button--small d-none" id="remove-all-items-button">Remove All Items</button>
         </div>
         {{> components/category/product-listing}}
         {{{region name="category_below_content"}}}
@@ -262,9 +262,9 @@ Both buttons should utilize the Storefront API for completion.
     toggleRemoveAllFromCart(bool) {
         const removeAllButton = document.querySelector('#remove-all-items-button');
         if (bool) {
-            removeAllButton.style.display = 'inline-block';
+            removeAllButton.classList.remove('d-none');
         } else {
-            removeAllButton.style.display = 'none';
+            removeAllButton.classList.add('d-none');
         }
     }
     ```

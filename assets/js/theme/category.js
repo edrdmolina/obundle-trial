@@ -37,7 +37,8 @@ export default class Category extends CatalogPage {
         this.initHoverEffect();
         this.initAddAllToCart();
         this.initRemoveAllFromCart();
-        if (!this.cartId) this.toggleRemoveAllFromCart(false);
+        if (this.cartId) this.toggleRemoveAllFromCart(true);
+        else this.toggleRemoveAllFromCart(false);
 
         $('[data-button-type="add-cart"]').on('click', (e) => this.setLiveRegionAttributes($(e.currentTarget).next(), 'status', 'polite'));
 
